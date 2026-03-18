@@ -82,13 +82,44 @@
                     <span>Total</span>
                     <span id="cart-total" class="font-bold text-amber-900">$0</span>
                 </div>
-                <button onclick="checkout()" class="w-full bg-amber-900 text-white py-4 rounded-xl font-bold hover:bg-amber-800 transition">
-                    Confirmar Compra
-                </button>
+                <button onclick="openCheckout()" class="w-full bg-amber-900 text-white py-4 rounded-xl font-bold hover:bg-amber-800 transition">
+    Ir a Pagar
+</button>
             </div>
         </div>
     </div>
-
+    <div id="checkout-modal" class="fixed inset-0 bg-black/40 justify-center items-center z-50 px-4 hidden">
+        <div class="bg-white w-full max-w-md p-8 shadow-2xl rounded-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="toggleCheckoutModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600">✕</button>
+            <h2 class="text-2xl text-center mb-6 text-stone-900">Detalles de Envío</h2>
+            
+            <form id="checkout-form" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Nombre Completo</label>
+                    <input type="text" id="checkout-name" required class="w-full border border-stone-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-900/20 bg-stone-50">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Teléfono</label>
+                    <input type="tel" id="checkout-phone" required class="w-full border border-stone-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-900/20 bg-stone-50">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Dirección de Entrega</label>
+                    <textarea id="checkout-address" rows="2" required class="w-full border border-stone-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-900/20 bg-stone-50"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Método de Pago</label>
+                    <select id="checkout-payment" required class="w-full border border-stone-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-amber-900/20 bg-stone-50 text-stone-700">
+                        <option value="efectivo">Efectivo contra entrega</option>
+                        <option value="transferencia">Transferencia Bancaria</option>
+                        <option value="tarjeta">Tarjeta (Datafono al entregar)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-amber-900 text-white py-4 rounded-xl font-bold hover:bg-amber-800 transition mt-4">
+                    Finalizar Pedido
+                </button>
+            </form>
+        </div>
+    </div>
     <script>
         /** CONFIGURACIÓN SUPABASE **/
         const supabaseUrl = 'https://srypoldlcviwmtzequmh.supabase.co'; 
@@ -127,6 +158,12 @@
 
         function toggleAuthModal() {
             const modal = document.getElementById('auth-modal');
+            modal.classList.toggle('hidden');
+            modal.classList.toggle('flex');
+        }
+
+          function toggleCheckoutModal() {
+            const modal = document.getElementById('checkout-modal');
             modal.classList.toggle('hidden');
             modal.classList.toggle('flex');
         }
@@ -198,21 +235,46 @@
             }
         });
 
-        async function checkout() {
+        async function openCheckout() {
             const { data: { user } } = await miYardSale.auth.getUser();
             if (!user) { alert("Inicia sesión para comprar."); return toggleAuthModal(); }
             if (cart.length === 0) return alert("El carrito está vacío");
 
+            toggleCart(); // Ocultamos el carrito
+            toggleCheckoutModal(); // Mostramos el formulario de envío
+        }
+
+        // Manejador del envío del formulario
+        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evita que la página recargue
+            
+            const { data: { user } } = await miYardSale.auth.getUser();
             const totalVenta = cart.reduce((sum, item) => sum + item.price, 0);
-            const { error } = await miYardSale.from('compras').insert([{ 
+
+            // Capturamos los datos del formulario
+            const datosCompra = {
                 user_id: user.id, 
                 articulos: cart, 
-                total: totalVenta 
-            }]);
+                total: totalVenta,
+                nombre: document.getElementById('checkout-name').value,
+                telefono: document.getElementById('checkout-phone').value,
+                direccion: document.getElementById('checkout-address').value,
+                metodo_pago: document.getElementById('checkout-payment').value
+            };
 
-            if (error) alert("Error al guardar: " + error.message);
-            else { alert("¡Compra guardada!"); cart = []; updateCartUI(); toggleCart(); }
-        }
+            // Guardamos en Supabase
+            const { error } = await miYardSale.from('compras').insert([datosCompra]);
+
+            if (error) {
+                alert("Error al guardar el pedido: " + error.message);
+            } else {
+                alert("¡Pedido completado con éxito! Recibirás tus tesoros pronto.");
+                cart = []; // Vaciamos carrito
+                updateCartUI();
+                toggleCheckoutModal(); // Cerramos modal
+                document.getElementById('checkout-form').reset(); // Limpiamos formulario
+            }
+        });
 
         renderProducts();
     </script>
