@@ -159,164 +159,200 @@
         </div>
     </div>
 
-    <script>
-        /** CONFIGURACIÓN SUPABASE **/
-        const supabaseUrl = 'https://srypoldlcviwmtzequmh.supabase.co'; 
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyeXBvbGRsY3Zpd210emVxdW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3OTIzMjQsImV4cCI6MjA4OTM2ODMyNH0.sAVAvSfCV2eDfMWZioKFLcsh4g-6I4m8hEpqaAkSfys'; 
-        const miYardSale = supabase.createClient(supabaseUrl, supabaseKey);
+    <script type="module">
+    /** IMPORTACIÓN DE SUPABASE **/
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-        /** ESTADO **/
-        let cart = [];
-        let isSignUpMode = false;
+    /** CONFIGURACIÓN **/
+    const supabaseUrl = 'https://srypoldlcviwmtzequmh.supabase.co'; 
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyeXBvbGRsY3Zpd210emVxdW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3OTIzMjQsImV4cCI6MjA4OTM2ODMyNH0.sAVAvSfCV2eDfMWZioKFLcsh4g-6I4m8hEpqaAkSfys'; 
+    const miYardSale = createClient(supabaseUrl, supabaseKey);
 
-        /** FUNCIONES DE INTERFAZ (UI) **/
-        function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('hidden'); document.getElementById('auth-modal').classList.toggle('flex'); }
-        function toggleCart() { document.getElementById('cart-modal').classList.toggle('hidden'); document.getElementById('cart-modal').classList.toggle('flex'); }
-        function toggleCheckoutModal() { document.getElementById('checkout-modal').classList.toggle('hidden'); document.getElementById('checkout-modal').classList.toggle('flex'); }
-        function togglePublishModal() { document.getElementById('publish-modal').classList.toggle('hidden'); document.getElementById('publish-modal').classList.toggle('flex'); }
+    /** ESTADO **/
+    let cart = [];
+    let isSignUpMode = false;
 
-        async function handleProfileClick() {
-            const { data: { user } } = await miYardSale.auth.getUser();
-            if (user) window.location.href = 'cuenta.html';
-            else toggleAuthModal();
+    /** FUNCIONES DE INTERFAZ (UI) - EXPUESTAS GLOBALMENTE **/
+    window.toggleAuthModal = () => { 
+        const modal = document.getElementById('auth-modal');
+        if(modal) {
+            modal.classList.toggle('hidden'); 
+            modal.classList.toggle('flex'); 
+        }
+    };
+
+    window.toggleCart = () => { 
+        const modal = document.getElementById('cart-modal');
+        if(modal) {
+            modal.classList.toggle('hidden'); 
+            modal.classList.toggle('flex'); 
+        }
+    };
+
+    window.toggleCheckoutModal = () => { 
+        const modal = document.getElementById('checkout-modal');
+        if(modal) {
+            modal.classList.toggle('hidden'); 
+            modal.classList.toggle('flex'); 
+        }
+    };
+
+    window.togglePublishModal = () => { 
+        const modal = document.getElementById('publish-modal');
+        if(modal) {
+            modal.classList.toggle('hidden'); 
+            modal.classList.toggle('flex'); 
+        }
+    };
+
+    window.handleProfileClick = async () => {
+        const { data: { user } } = await miYardSale.auth.getUser();
+        if (user) window.location.href = 'cuenta.html';
+        else window.toggleAuthModal();
+    };
+
+    window.openPublishModal = async () => {
+        const { data: { user } } = await miYardSale.auth.getUser();
+        if (!user) { 
+            alert("Debes iniciar sesión para publicar un tesoro."); 
+            return window.toggleAuthModal(); 
+        }
+        window.togglePublishModal();
+    };
+
+    window.switchAuthMode = () => {
+        isSignUpMode = !isSignUpMode;
+        document.getElementById('auth-title').innerText = isSignUpMode ? "Crear Cuenta" : "Iniciar Sesión";
+        document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Registrarse" : "Entrar";
+        document.getElementById('confirm-pass-container').classList.toggle('hidden');
+        document.getElementById('auth-switch-text').innerText = isSignUpMode ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?";
+        document.getElementById('auth-switch-btn').innerText = isSignUpMode ? "Inicia Sesión" : "Regístrate gratis";
+    };
+
+    window.addToCartDB = (id, name, price, img) => {
+        const product = { id, name, price, img };
+        cart.push(product);
+        updateCartUI();
+        window.toggleCart();
+    };
+
+    /** LÓGICA DE PRODUCTOS (DB) **/
+    async function loadProductsFromDB() {
+        const grid = document.getElementById('product-grid');
+        if (!grid) return;
+        
+        grid.innerHTML = `<div class="col-span-full text-center py-20 text-stone-400 italic">Buscando tesoros disponibles...</div>`;
+
+        const { data: productos, error } = await miYardSale
+            .from('productos')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Error cargando productos:", error);
+            grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Error al cargar la Yard Sale.</div>`;
+            return;
         }
 
-        async function openPublishModal() {
-            const { data: { user } } = await miYardSale.auth.getUser();
-            if (!user) { alert("Debes iniciar sesión para publicar un tesoro."); return toggleAuthModal(); }
-            togglePublishModal();
+        if (!productos || !productos.length) {
+            grid.innerHTML = `<div class="col-span-full text-center py-20 text-stone-400 italic">Aún no hay tesoros publicados. ¡Sé el primero!</div>`;
+            return;
         }
 
-        function switchAuthMode() {
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('auth-title').innerText = isSignUpMode ? "Crear Cuenta" : "Iniciar Sesión";
-            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Registrarse" : "Entrar";
-            document.getElementById('confirm-pass-container').classList.toggle('hidden');
-            document.getElementById('auth-switch-text').innerText = isSignUpMode ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?";
-            document.getElementById('auth-switch-btn').innerText = isSignUpMode ? "Inicia Sesión" : "Regístrate gratis";
-        }
-
-        /** LÓGICA DE PRODUCTOS (DB) **/
-        async function loadProductsFromDB() {
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = `<div class="col-span-full text-center py-20 text-stone-400 italic">Buscando tesoros disponibles...</div>`;
-
-            const { data: productos, error } = await miYardSale
-                .from('productos')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error("Error cargando productos:", error);
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Error al cargar la Yard Sale.</div>`;
-                return;
-            }
-
-            if (!productos.length) {
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-stone-400 italic">Aún no hay tesoros publicados. ¡Sé el primero!</div>`;
-                return;
-            }
-
-            grid.innerHTML = productos.map(p => `
-                <div class="group bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-xl transition-all duration-300">
-                    <div class="relative overflow-hidden aspect-square">
-                        <img src="${p.imagen_url}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" alt="${p.nombre}">
-                        <span class="absolute top-3 right-3 bg-stone-900/70 backdrop-blur-sm text-white text-[9px] px-2.5 py-1 rounded-full font-medium tracking-wider uppercase">En Venta</span>
+        grid.innerHTML = productos.map(p => `
+            <div class="group bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                <div class="relative overflow-hidden aspect-square">
+                    <img src="${p.imagen_url}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" alt="${p.nombre}">
+                    <span class="absolute top-3 right-3 bg-stone-900/70 backdrop-blur-sm text-white text-[9px] px-2.5 py-1 rounded-full font-medium tracking-wider uppercase">En Venta</span>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-stone-950 font-semibold mb-1 text-lg leading-tight">${p.nombre}</h3>
+                    <p class="text-stone-500 text-xs mb-3 line-clamp-2 italic">${p.descripcion}</p>
+                    <div class="flex items-end justify-between gap-4 mb-4 border-t border-stone-100 pt-3">
+                        <p class="text-amber-900 font-bold text-3xl leading-none">$${p.precio}</p>
+                        <span class="text-xs text-stone-400 italic">Vendedor Privado</span>
                     </div>
-                    <div class="p-6">
-                        <h3 class="text-stone-950 font-semibold mb-1 text-lg leading-tight">${p.nombre}</h3>
-                        <p class="text-stone-500 text-xs mb-3 line-clamp-2 italic">${p.descripcion}</p>
-                        <div class="flex items-end justify-between gap-4 mb-4 border-t border-stone-100 pt-3">
-                            <p class="text-amber-900 font-bold text-3xl leading-none">$${p.precio}</p>
-                            <span class="text-xs text-stone-400 italic">Vendedor Privado</span>
-                        </div>
-                        <button onclick="addToCartDB('${p.id}', '${p.nombre.replace(/'/g, "\\'")}', ${p.precio}, '${p.imagen_url}')" class="w-full border-2 border-amber-900/80 text-amber-950 py-3 rounded-xl text-sm font-semibold hover:bg-amber-900 hover:text-white transition-colors duration-300 active:scale-95 flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                            Lo quiero
-                        </button>
+                    <button onclick="addToCartDB('${p.id}', '${p.nombre.replace(/'/g, "\\'")}', ${p.precio}, '${p.imagen_url}')" class="w-full border-2 border-amber-900/80 text-amber-950 py-3 rounded-xl text-sm font-semibold hover:bg-amber-900 hover:text-white transition-colors duration-300 active:scale-95 flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        Lo quiero
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    /** LÓGICA DEL CARRITO **/
+    function updateCartUI() {
+        const container = document.getElementById('cart-items');
+        const totalEl = document.getElementById('cart-total');
+        const countEl = document.getElementById('cart-count');
+        if (!container || !totalEl || !countEl) return;
+
+        if (!cart.length) {
+            container.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-stone-400 italic py-20 text-center text-balance"><p>Aún no hay tesoros seleccionados.</p></div>';
+        } else {
+            container.innerHTML = cart.map((item, index) => `
+                <div class="flex items-center gap-4 bg-stone-50 p-3 rounded-xl border border-stone-100 shadow-sm animate-fade-in">
+                    <img src="${item.img}" class="w-16 h-16 rounded-lg object-cover shadow-inner">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium text-stone-950">${item.name}</h4>
+                        <p class="text-amber-900 font-bold">$${item.price}</p>
                     </div>
+                    <button onclick="window.removeItemFromCart(${index})" class="text-stone-300 hover:text-red-500 transition active:scale-90">✕</button>
                 </div>
             `).join('');
         }
 
-        function resetPubBtn(btn, text, spinner) {
-            btn.disabled = false;
-            text.textContent = "Publicar en la Yard Sale";
-            spinner.classList.add('hidden');
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        totalEl.innerText = `$${total}`;
+        countEl.innerText = cart.length;
+        countEl.classList.toggle('hidden', cart.length === 0);
+    }
+
+    window.removeItemFromCart = (index) => {
+        cart.splice(index, 1);
+        updateCartUI();
+    };
+
+    window.openCheckout = async () => {
+        const { data: { user } } = await miYardSale.auth.getUser();
+        if (!user) { 
+            alert("Inicia sesión para comprar."); 
+            return window.toggleAuthModal(); 
         }
+        if (cart.length === 0) return alert("El carrito está vacío");
+        window.toggleCart();
+        window.toggleCheckoutModal();
+    };
 
-        /** LÓGICA DEL CARRITO **/
-        function addToCartDB(id, name, price, img) {
-            const product = { id, name, price, img };
-            cart.push(product);
-            updateCartUI();
-            toggleCart();
-        }
+    /** INICIALIZACIÓN DE EVENTOS EN EL DOM **/
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        loadProductsFromDB(); 
+        updateCartUI();
 
-        function updateCartUI() {
-            const container = document.getElementById('cart-items');
-            const totalEl = document.getElementById('cart-total');
-            const countEl = document.getElementById('cart-count');
+        // Formulario de Publicación
+        const publishForm = document.getElementById('publish-form');
+        if (publishForm) {
+            publishForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const submitBtn = document.getElementById('pub-submit-btn');
+                const btnText = document.getElementById('pub-btn-text');
+                const spinner = document.getElementById('pub-spinner');
 
-            if (!cart.length) {
-                container.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-stone-400 italic py-20 text-center text-balance"><p>Aún no hay tesoros seleccionados.</p></div>';
-            } else {
-                container.innerHTML = cart.map((item, index) => `
-                    <div class="flex items-center gap-4 bg-stone-50 p-3 rounded-xl border border-stone-100 shadow-sm animate-fade-in">
-                        <img src="${item.img}" class="w-16 h-16 rounded-lg object-cover shadow-inner">
-                        <div class="flex-1">
-                            <h4 class="text-sm font-medium text-stone-950">${item.name}</h4>
-                            <p class="text-amber-900 font-bold">$${item.price}</p>
-                        </div>
-                        <button onclick="cart.splice(${index}, 1); updateCartUI()" class="text-stone-300 hover:text-red-500 transition active:scale-90">✕</button>
-                    </div>
-                `).join('');
-            }
+                submitBtn.disabled = true;
+                btnText.textContent = "Publicando...";
+                spinner.classList.remove('hidden');
 
-            const total = cart.reduce((sum, item) => sum + item.price, 0);
-            totalEl.innerText = `$${total}`;
-            countEl.innerText = cart.length;
-            countEl.classList.toggle('hidden', cart.length === 0);
-        }
+                const name = document.getElementById('pub-name').value;
+                const desc = document.getElementById('pub-desc').value;
+                const price = parseFloat(document.getElementById('pub-price').value);
+                const imageFile = document.getElementById('pub-image').files[0];
 
-        async function openCheckout() {
-            const { data: { user } } = await miYardSale.auth.getUser();
-            if (!user) { alert("Inicia sesión para comprar."); return toggleAuthModal(); }
-            if (cart.length === 0) return alert("El carrito está vacío");
-            toggleCart();
-            toggleCheckoutModal();
-        }
+                const { data: { user } } = await miYardSale.auth.getUser();
+                if (!user) { alert("Tu sesión expiró."); return window.togglePublishModal(); }
 
-        /** INICIALIZACIÓN DE EVENTOS EN EL DOM **/
-        // Todo lo que interactúe con el HTML debe ir aquí dentro
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // Cargar datos al iniciar
-            loadProductsFromDB(); 
-            updateCartUI();
-
-            // Evento: Formulario de Publicación
-            const publishForm = document.getElementById('publish-form');
-            if (publishForm) {
-                publishForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const submitBtn = document.getElementById('pub-submit-btn');
-                    const btnText = document.getElementById('pub-btn-text');
-                    const spinner = document.getElementById('pub-spinner');
-
-                    submitBtn.disabled = true;
-                    btnText.textContent = "Publicando...";
-                    spinner.classList.remove('hidden');
-
-                    const name = document.getElementById('pub-name').value;
-                    const desc = document.getElementById('pub-desc').value;
-                    const price = parseFloat(document.getElementById('pub-price').value);
-                    const imageFile = document.getElementById('pub-image').files[0];
-
-                    const { data: { user } } = await miYardSale.auth.getUser();
-
-                    if (!user) { alert("Tu sesión expiró."); return togglePublishModal(); }
-
+                try {
                     const fileExt = imageFile.name.split('.').pop();
                     const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
@@ -324,86 +360,87 @@
                         .from('fotos-tesoros')
                         .upload(fileName, imageFile);
 
-                    if (uploadError) {
-                        alert("Error al subir la imagen: " + uploadError.message);
-                        resetPubBtn(submitBtn, btnText, spinner);
-                        return;
-                    }
+                    if (uploadError) throw uploadError;
 
                     const { data: { publicUrl } } = miYardSale.storage
                         .from('fotos-tesoros')
                         .getPublicUrl(fileName);
 
-                    const nuevoProducto = {
-                        nombre: name,
-                        descripcion: desc,
-                        precio: price,
-                        imagen_url: publicUrl,
-                        vendedor_id: user.id
-                    };
-
                     const { error: dbError } = await miYardSale
                         .from('productos')
-                        .insert([nuevoProducto]);
+                        .insert([{
+                            nombre: name,
+                            descripcion: desc,
+                            precio: price,
+                            imagen_url: publicUrl,
+                            vendedor_id: user.id
+                        }]);
 
-                    if (dbError) {
-                        alert("Error al guardar producto: " + dbError.message);
-                    } else {
-                        alert("¡Tu tesoro ya está a la venta!");
-                        document.getElementById('publish-form').reset();
-                        togglePublishModal();
-                        loadProductsFromDB(); 
-                    }
+                    if (dbError) throw dbError;
 
-                    resetPubBtn(submitBtn, btnText, spinner);
-                });
-            }
+                    alert("¡Tu tesoro ya está a la venta!");
+                    publishForm.reset();
+                    window.togglePublishModal();
+                    loadProductsFromDB(); 
 
-            // Evento: Formulario de Autenticación
-            const authForm = document.getElementById('auth-form');
-            if (authForm) {
-                authForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
+                } catch (err) {
+                    alert("Error: " + err.message);
+                } finally {
+                    submitBtn.disabled = false;
+                    btnText.textContent = "Publicar en la Yard Sale";
+                    spinner.classList.add('hidden');
+                }
+            });
+        }
 
-                    if (isSignUpMode) {
-                        const { error } = await miYardSale.auth.signUp({ email, password });
-                        if (error) alert(error.message);
-                        else { alert("¡Registro exitoso! Ya puedes publicar tus tesoros."); toggleAuthModal(); }
-                    } else {
-                        const { error } = await miYardSale.auth.signInWithPassword({ email, password });
-                        if (error) alert(error.message);
-                        else { alert("¡Bienvenido de nuevo!"); toggleAuthModal(); }
-                    }
-                });
-            }
+        // Formulario de Autenticación
+        const authForm = document.getElementById('auth-form');
+        if (authForm) {
+            authForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-            // Evento: Formulario de Checkout
-            const checkoutForm = document.getElementById('checkout-form');
-            if (checkoutForm) {
-                checkoutForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const { data: { user } } = await miYardSale.auth.getUser();
-                    const totalVenta = cart.reduce((sum, item) => sum + item.price, 0);
+                if (isSignUpMode) {
+                    const { error } = await miYardSale.auth.signUp({ email, password });
+                    if (error) alert(error.message);
+                    else { alert("¡Registro exitoso! Revisa tu correo (si está habilitado) o inicia sesión."); window.toggleAuthModal(); }
+                } else {
+                    const { error } = await miYardSale.auth.signInWithPassword({ email, password });
+                    if (error) alert(error.message);
+                    else { alert("¡Bienvenido de nuevo!"); window.toggleAuthModal(); }
+                }
+            });
+        }
 
-                    const datosCompra = {
-                        user_id: user.id, 
-                        articulos: cart, 
-                        total: totalVenta,
-                        nombre: document.getElementById('checkout-name').value,
-                        telefono: document.getElementById('checkout-phone').value,
-                        direccion: document.getElementById('checkout-address').value,
-                        metodo_pago: document.getElementById('checkout-payment').value
-                    };
+        // Formulario de Checkout
+        const checkoutForm = document.getElementById('checkout-form');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const { data: { user } } = await miYardSale.auth.getUser();
+                const totalVenta = cart.reduce((sum, item) => sum + item.price, 0);
 
-                    const { error } = await miYardSale.from('compras').insert([datosCompra]);
+                const { error } = await miYardSale.from('compras').insert([{
+                    user_id: user.id, 
+                    articulos: cart, 
+                    total: totalVenta,
+                    nombre: document.getElementById('checkout-name').value,
+                    telefono: document.getElementById('checkout-phone').value,
+                    direccion: document.getElementById('checkout-address').value,
+                    metodo_pago: document.getElementById('checkout-payment').value
+                }]);
 
-                    if (error) { alert("Error al guardar: " + error.message); }
-                    else { alert("¡Pedido completado!"); cart = []; updateCartUI(); toggleCheckoutModal(); }
-                });
-            }
-        });
-    </script>
+                if (error) { alert("Error al guardar: " + error.message); }
+                else { 
+                    alert("¡Pedido completado!"); 
+                    cart = []; 
+                    updateCartUI(); 
+                    window.toggleCheckoutModal(); 
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
