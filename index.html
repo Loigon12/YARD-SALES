@@ -108,9 +108,11 @@
 
     <script>
         /** CONFIGURACIÓN SUPABASE **/
-        const supabaseUrl = 'https://srypoldlcviwmtzequmh.supabase.co'; // <--- CAMBIA ESTO
-        const supabaseKey = 'sb_publishable_ElXxT73EGlWLth6hs9rp4A_mPDpDnq6'; // <--- CAMBIA ESTO
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = 'https://srypoldlcviwmtzequmh.supabase.co'; 
+const supabaseKey = 'sb_publishable_ElXxT73EGlWLTh6hs9rp4A_mPDpDnq6'; 
+
+// Cambiamos el nombre de la variable aquí:
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         /** DATOS Y ESTADO **/
         const products = [
@@ -239,13 +241,13 @@
 
             const totalVenta = cart.reduce((sum, item) => sum + item.price, 0);
 
-            const { error } = await supabase
-                .from('compras')
-                .insert([{ 
-                    user_id: user.id, 
-                    articulos: cart, 
-                    total: totalVenta 
-                }]);
+            const { error } = await supabaseClient
+    .from('compras')
+    .insert([{ 
+        user_id: user.id, 
+        articulos: cart, 
+        total: totalVenta 
+    }]);
 
             if (error) {
                 console.error(error);
