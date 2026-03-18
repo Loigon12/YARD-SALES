@@ -31,7 +31,7 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
         
         // Tu configuración de Supabase
-        const supabase = createClient('TU_URL', 'TU_KEY');
+        const supabase = createClient('https://srypoldlcviwmtzequmh.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyeXBvbGRsY3Zpd210emVxdW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3OTIzMjQsImV4cCI6MjA4OTM2ODMyNH0.sAVAvSfCV2eDfMWZioKFLcsh4g-6I4m8hEpqaAkSfys');
 
         async function cargarBandeja() {
             const { data: { user } } = await supabase.auth.getUser();
