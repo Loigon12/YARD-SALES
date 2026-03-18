@@ -691,6 +691,14 @@ window.openChat = async (productoId, vendedorId, productoNombre) => {
     }
     if (user.id === vendedorId) return alert("¡Este tesoro es tuyo!");
 
+    if (!user) return window.toggleAuthModal();
+
+    activeProductId = productoId;
+    // Si YO soy el vendedor, el "receptor" de mis mensajes será la otra persona
+    // Para esto, en la bandeja de entrada pasaremos el ID del interesado
+    activeSellerId = vendedorId; 
+
+    document.getElementById('chat-product-name').innerText = productoNombre;
     activeProductId = productoId;
     activeSellerId = vendedorId;
     document.getElementById('chat-product-name').innerText = productoNombre;
@@ -805,6 +813,22 @@ async function iniciarEscuchaNotificaciones() {
 
 // Iniciar la escucha al cargar la página
 document.addEventListener('DOMContentLoaded', iniciarEscuchaNotificaciones);
+
+document.addEventListener('DOMContentLoaded', () => {
+    const productId = localStorage.getItem('chat_activo_id');
+    const destinatarioId = localStorage.getItem('chat_destinatario_id');
+    const nombreProd = localStorage.getItem('chat_nombre_prod');
+
+    if (productId && destinatarioId) {
+        // Limpiamos el storage para que no se abra siempre
+        localStorage.removeItem('chat_activo_id');
+        localStorage.removeItem('chat_destinatario_id');
+        localStorage.removeItem('chat_nombre_prod');
+        
+        // Abrimos el chat automáticamente
+        openChat(productId, destinatarioId, nombreProd);
+    }
+});
 </script>
 </body>
 </html>

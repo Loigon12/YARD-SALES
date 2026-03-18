@@ -85,14 +85,13 @@
             });
         }
 
-        window.abrirChat = (id, vendedor, nombre) => {
-            // Aquí puedes redirigir al index y abrir el modal automáticamente 
-            // o cargar el modal de chat en esta misma página.
-            localStorage.setItem('openChatId', id);
-            localStorage.setItem('openChatVendedor', vendedor);
-            localStorage.setItem('openChatNombre', nombre);
-            window.location.href = 'index.html';
-        };
+       window.abrirChat = (productoId, otroUsuarioId, nombreProducto) => {
+    // Guardamos los datos necesarios para que el index.html sepa qué chat abrir
+    localStorage.setItem('chat_activo_id', productoId);
+    localStorage.setItem('chat_destinatario_id', otroUsuarioId);
+    localStorage.setItem('chat_nombre_prod', nombreProducto);
+    window.location.href = 'index.html';
+};
 
         document.addEventListener('DOMContentLoaded', cargarBandeja);
     </script>
