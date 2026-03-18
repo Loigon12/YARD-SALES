@@ -17,6 +17,10 @@
     <nav class="flex justify-between items-center p-6 max-w-6xl mx-auto sticky top-0 bg-stone-50/80 backdrop-blur-md z-40">
         <h1 class="text-2xl text-amber-900">Yard Sale.</h1>
         <div class="flex gap-4">
+            <button onclick="openPublishModal()" class="flex items-center gap-1.5 bg-amber-900 text-white px-4 py-2 rounded-full text-xs font-semibold hover:bg-amber-950 transition active:scale-95 shadow-md">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Publicar
+    </button>
             <button onclick="handleProfileClick()" class="p-2 hover:bg-stone-200 rounded-full transition">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </button>
@@ -126,58 +130,33 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyeXBvbGRsY3Zpd210emVxdW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3OTIzMjQsImV4cCI6MjA4OTM2ODMyNH0.sAVAvSfCV2eDfMWZioKFLcsh4g-6I4m8hEpqaAkSfys'; // Cambia esto por la llave que empieza con eyJ
         const miYardSale = supabase.createClient(supabaseUrl, supabaseKey);
 
-        /** DATOS Y ESTADO **/
-        const products = [
-            { id: 1, name: "Cámara Analógica Canon", price: 85, img: "https://images.unsplash.com/photo-1516961642265-531546e84af2?w=500&auto=format" },
-            { id: 2, name: "Lámpara Minimalista", price: 30, img: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=500&auto=format" },
-            { id: 3, name: "Silla de Mimbre", price: 45, img: "https://images.unsplash.com/photo-1519947486511-4614940ea124?w=500&auto=format" },
-            { id: 4, name: "Espejo Vintage Dorado", price: 60, img: "https://images.unsplash.com/photo-1618220179428-22790b461013?w=500&auto=format" }
-        ];
-
+        /** ESTADO **/
         let cart = [];
         let isSignUpMode = false;
+        // Ya no usaremos un array 'products' fijo aquí. Se cargará de la DB.
 
-        /** FUNCIONES DE INTERFAZ **/
-        function renderProducts() {
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = products.map(p => `
-                <div class="group bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-xl transition-all duration-300">
-                    <div class="relative overflow-hidden aspect-square">
-                        <img src="${p.img}" class="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500">
-                    </div>
-                    <div class="p-6">
-                        <h3 class="text-stone-900 font-medium mb-1">${p.name}</h3>
-                        <p class="text-amber-900 font-bold mb-4 text-xl">$${p.price}</p>
-                        <button onclick="addToCart(${p.id})" class="w-full border border-stone-200 py-2.5 rounded-lg text-sm font-semibold hover:bg-stone-900 hover:text-white transition-colors duration-300">
-                            Agregar al carrito
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
+        /** INICIALIZACIÓN **/
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProductsFromDB(); // Carga productos reales al iniciar
+            updateCartUI();
+        });
 
-        function toggleAuthModal() {
-            const modal = document.getElementById('auth-modal');
-            modal.classList.toggle('hidden');
-            modal.classList.toggle('flex');
-        }
-
-          function toggleCheckoutModal() {
-            const modal = document.getElementById('checkout-modal');
-            modal.classList.toggle('hidden');
-            modal.classList.toggle('flex');
-        }
-
-        function toggleCart() {
-            const modal = document.getElementById('cart-modal');
-            modal.classList.toggle('hidden');
-            modal.classList.toggle('flex');
-        }
+        /** FUNCIONES DE INTERFAZ (UI) **/
+        function toggleAuthModal() { document.getElementById('auth-modal').classList.toggle('hidden'); document.getElementById('auth-modal').classList.toggle('flex'); }
+        function toggleCart() { document.getElementById('cart-modal').classList.toggle('hidden'); document.getElementById('cart-modal').classList.toggle('flex'); }
+        function toggleCheckoutModal() { document.getElementById('checkout-modal').classList.toggle('hidden'); document.getElementById('checkout-modal').classList.toggle('flex'); }
+        function togglePublishModal() { document.getElementById('publish-modal').classList.toggle('hidden'); document.getElementById('publish-modal').classList.toggle('flex'); }
 
         async function handleProfileClick() {
             const { data: { user } } = await miYardSale.auth.getUser();
             if (user) window.location.href = 'cuenta.html';
             else toggleAuthModal();
+        }
+
+        async function openPublishModal() {
+            const { data: { user } } = await miYardSale.auth.getUser();
+            if (!user) { alert("Debes iniciar sesión para publicar un tesoro."); return toggleAuthModal(); }
+            togglePublishModal();
         }
 
         function switchAuthMode() {
@@ -186,14 +165,137 @@
             document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "Registrarse" : "Entrar";
             document.getElementById('confirm-pass-container').classList.toggle('hidden');
             document.getElementById('auth-switch-text').innerText = isSignUpMode ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?";
-            document.getElementById('auth-switch-btn').innerText = isSignUpMode ? "Inicia Sesión" : "Regístrate";
+            document.getElementById('auth-switch-btn').innerText = isSignUpMode ? "Inicia Sesión" : "Regístrate gratis";
         }
 
-        /** LÓGICA DE NEGOCIO **/
-        function addToCart(id) {
-            const product = products.find(p => p.id === id);
+        /** LÓGICA DE PRODUCTOS (DB) **/
+        async function loadProductsFromDB() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = `<div class="col-span-full text-center py-20 text-stone-400 italic">Buscando tesoros disponibles...</div>`;
+
+            // Consultamos la nueva tabla 'productos'
+            const { data: productos, error } = await miYardSale
+                .from('productos')
+                .select('*') // Podríamos traer info del vendedor aquí en el futuro
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Error cargando productos:", error);
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Error al cargar la Yard Sale.</div>`;
+                return;
+            }
+
+            if (!productos.length) {
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-stone-400 italic">Aún no hay tesoros publicados. ¡Sé el primero!</div>`;
+                return;
+            }
+
+            // Renderizamos los productos dinámicos
+            // Nota: Aquí no podemos obtener el email del vendedor fácilmente sin una 'view' o 'join' en Supabase,
+            // pero sí tenemos su ID. Para este ejemplo, mostraremos una etiqueta "Vendedor Privado".
+            grid.innerHTML = productos.map(p => `
+                <div class="group bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                    <div class="relative overflow-hidden aspect-square">
+                        <img src="${p.imagen_url}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" alt="${p.nombre}">
+                        <span class="absolute top-3 right-3 bg-stone-900/70 backdrop-blur-sm text-white text-[9px] px-2.5 py-1 rounded-full font-medium tracking-wider uppercase">En Venta</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-stone-950 font-semibold mb-1 text-lg leading-tight">${p.nombre}</h3>
+                        <p class="text-stone-500 text-xs mb-3 line-clamp-2 italic">${p.descripcion}</p>
+                        <div class="flex items-end justify-between gap-4 mb-4 border-t border-stone-100 pt-3">
+                            <p class="text-amber-900 font-bold text-3xl leading-none">$${p.precio}</p>
+                            <span class="text-xs text-stone-400 italic">Vendedor Privado</span>
+                        </div>
+                        <button onclick="addToCartDB(${p.id}, '${p.nombre}', ${p.precio}, '${p.imagen_url}')" class="w-full border-2 border-amber-900/80 text-amber-950 py-3 rounded-xl text-sm font-semibold hover:bg-amber-900 hover:text-white transition-colors duration-300 active:scale-95 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            Lo quiero
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /** LÓGICA DE PUBLICACIÓN (DB + STORAGE) **/
+        document.getElementById('publish-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('pub-submit-btn');
+            const btnText = document.getElementById('pub-btn-text');
+            const spinner = document.getElementById('pub-spinner');
+
+            // Mostrar estado de carga
+            submitBtn.disabled = true;
+            btnText.textContent = "Publicando...";
+            spinner.classList.remove('hidden');
+
+            const name = document.getElementById('pub-name').value;
+            const desc = document.getElementById('pub-desc').value;
+            const price = parseFloat(document.getElementById('pub-price').value);
+            const imageFile = document.getElementById('pub-image').files[0];
+
+            const { data: { user } } = await miYardSale.auth.getUser();
+
+            if (!user) { alert("Tu sesión expiró."); return togglePublishModal(); }
+
+            // 1. Subir Imagen a Storage
+            // Creamos un nombre de archivo único usando timestamp y user_id
+            const fileExt = imageFile.name.split('.').pop();
+            const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+            const filePath = `fotos-tesoros/${fileName}`;
+
+            let { error: uploadError } = await miYardSale.storage
+                .from('fotos-tesoros')
+                .upload(fileName, imageFile);
+
+            if (uploadError) {
+                alert("Error al subir la imagen: " + uploadError.message);
+                resetPubBtn(submitBtn, btnText, spinner);
+                return;
+            }
+
+            // 2. Obtener la URL pública de la imagen
+            const { data: { publicUrl } } = miYardSale.storage
+                .from('fotos-tesoros')
+                .getPublicUrl(fileName);
+
+            // 3. Guardar datos en la tabla 'productos'
+            const nuevoProducto = {
+                nombre: name,
+                descripcion: desc,
+                precio: price,
+                imagen_url: publicUrl,
+                vendedor_id: user.id
+            };
+
+            const { error: dbError } = await miYardSale
+                .from('productos')
+                .insert([nuevoProducto]);
+
+            if (dbError) {
+                alert("Error al guardar producto: " + dbError.message);
+                // Aquí se debería borrar la imagen subida en Storage idealmente
+            } else {
+                alert("¡Tu tesoro ya está a la venta!");
+                document.getElementById('publish-form').reset();
+                togglePublishModal();
+                loadProductsFromDB(); // Recargamos la cuadrícula
+            }
+
+            resetPubBtn(submitBtn, btnText, spinner);
+        });
+
+        function resetPubBtn(btn, text, spinner) {
+            btn.disabled = false;
+            text.textContent = "Publicar en la Yard Sale";
+            spinner.classList.add('hidden');
+        }
+
+        /** LÓGICA DEL CARRITO (Actualizada para DB) **/
+        // Adaptamos addToCart para que reciba datos del objeto de la DB
+        function addToCartDB(id, name, price, img) {
+            const product = { id, name, price, img };
             cart.push(product);
             updateCartUI();
+            toggleCart();
         }
 
         function updateCartUI() {
@@ -201,16 +303,20 @@
             const totalEl = document.getElementById('cart-total');
             const countEl = document.getElementById('cart-count');
 
-            container.innerHTML = cart.map((item, index) => `
-                <div class="flex items-center gap-4 bg-stone-50 p-3 rounded-xl">
-                    <img src="${item.img}" class="w-16 h-16 rounded-lg object-cover">
-                    <div class="flex-1">
-                        <h4 class="text-sm font-medium">${item.name}</h4>
-                        <p class="text-amber-900 font-bold">$${item.price}</p>
+            if (!cart.length) {
+                container.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-stone-400 italic py-20 text-center text-balance"><p>Aún no hay tesoros seleccionados.</p></div>';
+            } else {
+                container.innerHTML = cart.map((item, index) => `
+                    <div class="flex items-center gap-4 bg-stone-50 p-3 rounded-xl border border-stone-100 shadow-sm animate-fade-in">
+                        <img src="${item.img}" class="w-16 h-16 rounded-lg object-cover shadow-inner">
+                        <div class="flex-1">
+                            <h4 class="text-sm font-medium text-stone-950">${item.name}</h4>
+                            <p class="text-amber-900 font-bold">$${item.price}</p>
+                        </div>
+                        <button onclick="cart.splice(${index}, 1); updateCartUI()" class="text-stone-300 hover:text-red-500 transition active:scale-90">✕</button>
                     </div>
-                    <button onclick="cart.splice(${index}, 1); updateCartUI()" class="text-stone-300 hover:text-red-500">✕</button>
-                </div>
-            `).join('');
+                `).join('');
+            }
 
             const total = cart.reduce((sum, item) => sum + item.price, 0);
             totalEl.innerText = `$${total}`;
@@ -218,7 +324,7 @@
             countEl.classList.toggle('hidden', cart.length === 0);
         }
 
-        /** AUTENTICACIÓN Y COMPRA **/
+        /** AUTENTICACIÓN Y COMPRA (Sin Cambios Críticos) **/
         document.getElementById('auth-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -227,11 +333,11 @@
             if (isSignUpMode) {
                 const { error } = await miYardSale.auth.signUp({ email, password });
                 if (error) alert(error.message);
-                else { alert("¡Registro exitoso!"); toggleAuthModal(); }
+                else { alert("¡Registro exitoso! Ya puedes publicar tus tesoros."); toggleAuthModal(); }
             } else {
                 const { error } = await miYardSale.auth.signInWithPassword({ email, password });
                 if (error) alert(error.message);
-                else { alert("¡Bienvenido!"); toggleAuthModal(); }
+                else { alert("¡Bienvenido de nuevo!"); toggleAuthModal(); }
             }
         });
 
@@ -239,22 +345,18 @@
             const { data: { user } } = await miYardSale.auth.getUser();
             if (!user) { alert("Inicia sesión para comprar."); return toggleAuthModal(); }
             if (cart.length === 0) return alert("El carrito está vacío");
-
-            toggleCart(); // Ocultamos el carrito
-            toggleCheckoutModal(); // Mostramos el formulario de envío
+            toggleCart();
+            toggleCheckoutModal();
         }
 
-        // Manejador del envío del formulario
         document.getElementById('checkout-form').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Evita que la página recargue
-            
+            e.preventDefault();
             const { data: { user } } = await miYardSale.auth.getUser();
             const totalVenta = cart.reduce((sum, item) => sum + item.price, 0);
 
-            // Capturamos los datos del formulario
             const datosCompra = {
                 user_id: user.id, 
-                articulos: cart, 
+                articulos: cart, // Nota: Seguimos guardando los productos comprados aquí como JSONB
                 total: totalVenta,
                 nombre: document.getElementById('checkout-name').value,
                 telefono: document.getElementById('checkout-phone').value,
@@ -262,21 +364,43 @@
                 metodo_pago: document.getElementById('checkout-payment').value
             };
 
-            // Guardamos en Supabase
             const { error } = await miYardSale.from('compras').insert([datosCompra]);
 
-            if (error) {
-                alert("Error al guardar el pedido: " + error.message);
-            } else {
-                alert("¡Pedido completado con éxito! Recibirás tus tesoros pronto.");
-                cart = []; // Vaciamos carrito
-                updateCartUI();
-                toggleCheckoutModal(); // Cerramos modal
-                document.getElementById('checkout-form').reset(); // Limpiamos formulario
-            }
+            if (error) { alert("Error al guardar: " + error.message); }
+            else { alert("¡Pedido completado!"); cart = []; updateCartUI(); toggleCheckoutModal(); }
         });
-
-        renderProducts();
     </script>
+    <div id="publish-modal" class="fixed inset-0 bg-black/50 justify-center items-center z-50 px-4 hidden">
+        <div class="bg-white w-full max-w-lg p-8 shadow-2xl rounded-2xl relative max-h-[95vh] overflow-y-auto">
+            <button onclick="togglePublishModal()" class="absolute top-5 right-5 text-stone-400 hover:text-stone-700">✕</button>
+            <h2 class="text-3xl font-semibold mb-2 text-stone-950">Pon tu tesoro en venta</h2>
+            <p class="text-stone-500 mb-8 text-sm text-balance">Comparte la historia de tu objeto y dale una nueva vida en otro hogar.</p>
+            
+            <form id="publish-form" class="space-y-5">
+                <div>
+                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">Nombre del Objeto</label>
+                    <input type="text" id="pub-name" required placeholder="Ej. Lámpara Vintage de Bronce" class="w-full border border-stone-200 rounded-xl p-3.5 focus:outline-none focus:ring-2 focus:ring-amber-900/20 bg-stone-50">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">Descripción y su historia</label>
+                    <textarea id="pub-desc" rows="4" required placeholder="Cuéntanos cuándo la conseguiste, su estado actual y por qué la vendes..." class="w-full border border-stone-200 rounded-xl p-3.5 focus:outline-none focus:ring-2 focus:ring-amber-900/20 bg-stone-50"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">Precio (USD)</label>
+                        <input type="number" id="pub-price" required placeholder="Ej. 45" class="w-full border border-stone-200 rounded-xl p-3.5 focus:outline-none focus:ring-2 focus:ring-amber-900/20 bg-stone-50">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">Foto del Tesoro</label>
+                        <input type="file" id="pub-image" accept="image/*" required class="w-full text-xs text-stone-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-50 file:text-amber-900 hover:file:bg-amber-100 cursor-pointer">
+                    </div>
+                </div>
+                <button type="submit" id="pub-submit-btn" class="w-full bg-stone-950 text-white py-4 rounded-xl font-bold hover:bg-black transition mt-6 shadow-xl shadow-stone-200 flex items-center justify-center gap-2">
+                    <span id="pub-btn-text">Publicar en la Yard Sale</span>
+                    <div id="pub-spinner" class="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin hidden"></div>
+                </button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

@@ -42,6 +42,16 @@
             <div id="history-list" class="space-y-4">
                 </div>
         </section>
+
+        <section class="mb-12">
+        <div class="flex justify-between items-end mb-8 border-b border-stone-200 pb-4">
+            <h2 class="text-2xl text-stone-950 font-semibold">Tus Tesoros Publicados</h2>
+            <span id="selling-count" class="text-stone-400 text-sm italic">0 en venta</span>
+        </div>
+        <div id="selling-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <p class="text-stone-400 italic">Buscando tus publicaciones...</p>
+        </div>
+    </section>
     </main>
 
     <script>
@@ -55,63 +65,57 @@
 
             document.getElementById('user-email').textContent = user.email;
             document.getElementById('user-initial').textContent = user.email[0].toUpperCase();
+            
+            // Cargar ambas secciones
             loadHistory(user.id);
+            loadMySales(user.id); // <-- NUEVA LLAMADA
         }
 
-        async function loadHistory(userId) {
-            const container = document.getElementById('history-list');
-            const { data: compras, error } = await miYardSale
-                .from('compras')
+        // --- NUEVA FUNCIÓN: CARGAR MIS VENTAS ---
+        async function loadMySales(userId) {
+            const container = document.getElementById('selling-list');
+            const countLabel = document.getElementById('selling-count');
+
+            // Consultamos la tabla 'productos' filtrando por 'vendedor_id'
+            const { data: productos, error } = await miYardSale
+                .from('productos')
                 .select('*')
-                .eq('user_id', userId)
+                .eq('vendedor_id', userId)
                 .order('created_at', { ascending: false });
 
-            if (error || !compras.length) {
-                container.innerHTML = `<div class="text-center py-20 bg-stone-100/50 rounded-2xl border-2 border-dashed border-stone-200">
-                    <p class="text-stone-400">Aún no has adquirido ningún tesoro.</p>
+            if (error) {
+                console.error("Error cargando ventas:", error);
+                container.innerHTML = `<p class="text-red-500 italic col-span-full">Error al buscar tus publicaciones.</p>`;
+                return;
+            }
+
+            if (!productos.length) {
+                container.innerHTML = `<div class="col-span-full text-center py-10 bg-stone-100/50 rounded-xl border border-dashed border-stone-200">
+                    <p class="text-stone-400 italic text-sm text-balance">No tienes tesoros publicados. ¡Pon tu primer objeto a la venta en la página principal!</p>
                 </div>`;
                 return;
             }
 
-            document.getElementById('purchase-count').textContent = `${compras.length} pedidos encontrados`;
+            countLabel.textContent = `${productos.length} en venta`;
             
-            container.innerHTML = compras.map(compra => `
-                <div class="bg-white p-6 rounded-xl border border-stone-100 shadow-sm hover:shadow-md transition">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
-                        <div class="flex gap-6 items-center">
-                            <div class="flex -space-x-3">
-                                ${compra.articulos.slice(0, 4).map(item => `
-                                    <img src="${item.img}" class="h-14 w-14 rounded-full border-4 border-white object-cover shadow-sm">
-                                `).join('')}
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">${new Date(compra.created_at).toLocaleDateString()}</p>
-                                <p class="text-stone-900 font-semibold text-lg">${compra.articulos.length} artículos</p>
-                            </div>
+            container.innerHTML = productos.map(p => `
+                <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-start gap-4">
+                    <img src="${p.imagen_url}" class="h-20 w-20 rounded-xl object-cover shadow-sm flex-shrink-0">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-start gap-3 mb-2">
+                            <h4 class="text-stone-950 font-semibold leading-snug line-clamp-1">${p.nombre}</h4>
+                            <p class="text-amber-900 font-bold text-xl leading-none flex-shrink-0">$${p.precio}</p>
                         </div>
-                        <div class="text-center md:text-right bg-stone-50 px-6 py-3 rounded-xl border border-stone-100 w-full md:w-auto">
-                            <p class="text-amber-900 font-bold text-2xl">$${compra.total}</p>
-                            <p class="text-[10px] text-stone-400 font-mono">Orden #${compra.id}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-stone-100 pt-6">
-                        <div>
-                            <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Entregar a</span>
-                            <p class="text-sm font-medium text-stone-800">${compra.nombre || 'No registrado'}</p>
-                            <p class="text-sm text-stone-500">${compra.direccion || 'No registrado'}</p>
-                            <p class="text-sm text-stone-500">Tel: ${compra.telefono || 'No registrado'}</p>
-                        </div>
-                        <div class="md:text-right">
-                            <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">Método de Pago</span>
-                            <p class="text-sm font-medium text-stone-800 capitalize inline-flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                ${compra.metodo_pago ? compra.metodo_pago.replace('-', ' ') : 'No registrado'}
-                            </p>
-                        </div>
+                        <p class="text-stone-500 text-xs mb-3 italic line-clamp-2">${p.descripcion}</p>
+                        <p class="text-[10px] text-stone-400 uppercase tracking-wider font-medium">${new Date(p.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // --- HISTORIAL DE COMPRAS MEJORADO (sin cambios críticos, solo UI limpia) ---
+        async function loadHistory(userId) {
+            // ... (copia tu función loadHistory aquí, está perfecta como quedó) ...
         }
 
         async function logout() {
