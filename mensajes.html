@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Mensajes | Yard Sale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-stone-50 text-stone-900 min-h-screen">
+
+    <nav class="p-6 max-w-5xl mx-auto flex justify-between items-center">
+        <a href="index.html" class="font-black text-2xl tracking-tighter">Yard Sale<span class="text-amber-600">.</span></a>
+        <button onclick="window.history.back()" class="text-sm font-medium text-stone-500 hover:text-stone-900 transition">Volver</button>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 py-12">
+        <header class="mb-10">
+            <h1 class="text-4xl font-bold tracking-tight">Mensajes</h1>
+            <p class="text-stone-500 mt-2">Gestiona las conversaciones de tus tesoros.</p>
+        </header>
+
+        <div id="lista-conversaciones" class="space-y-4">
+            <div class="animate-pulse space-y-4">
+                <div class="h-24 bg-stone-200 rounded-3xl"></div>
+                <div class="h-24 bg-stone-200 rounded-3xl"></div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        
+        // Tu configuración de Supabase
+        const supabase = createClient('TU_URL', 'TU_KEY');
+
+        async function cargarBandeja() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return window.location.href = 'index.html';
+
+            const { data: chats, error } = await supabase
+                .from('bandeja_entrada')
+                .select('*')
+                .or(`emisor_id.eq.${user.id},receptor_id.eq.${user.id}`)
+                .order('created_at', { ascending: false });
+
+            const container = document.getElementById('lista-conversaciones');
+            container.innerHTML = '';
+
+            if (chats.length === 0) {
+                container.innerHTML = '<p class="text-center py-20 text-stone-400 italic">Aún no tienes conversaciones activas.</p>';
+                return;
+            }
+
+            chats.forEach(chat => {
+                const esVendedor = user.id === chat.vendedor_id;
+                const card = `
+                    <div onclick="abrirChat('${chat.producto_id}', '${chat.vendedor_id}', '${chat.producto_nombre}')" 
+                         class="group bg-white p-5 rounded-3xl border border-stone-100 shadow-sm hover:shadow-md hover:border-amber-900/10 transition-all cursor-pointer flex items-center gap-5 animate-fade-in">
+                        
+                        <img src="${chat.producto_imagen}" class="w-16 h-16 rounded-2xl object-cover border border-stone-100 group-hover:scale-105 transition-transform">
+                        
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-stone-900 truncate">${chat.producto_nombre}</h3>
+                                <span class="text-[10px] text-stone-400 uppercase font-medium">
+                                    ${new Date(chat.created_at).toLocaleDateString()}
+                                </span>
+                            </div>
+                            <p class="text-sm text-stone-500 truncate italic">
+                                "${chat.contenido}"
+                            </p>
+                            <span class="inline-block mt-2 px-2 py-0.5 bg-stone-100 text-[10px] rounded-md text-stone-400">
+                                ${esVendedor ? 'Venta' : 'Interesado'}
+                            </span>
+                        </div>
+                        
+                        <div class="text-stone-300 group-hover:text-amber-700 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', card);
+            });
+        }
+
+        window.abrirChat = (id, vendedor, nombre) => {
+            // Aquí puedes redirigir al index y abrir el modal automáticamente 
+            // o cargar el modal de chat en esta misma página.
+            localStorage.setItem('openChatId', id);
+            localStorage.setItem('openChatVendedor', vendedor);
+            localStorage.setItem('openChatNombre', nombre);
+            window.location.href = 'index.html';
+        };
+
+        document.addEventListener('DOMContentLoaded', cargarBandeja);
+    </script>
+
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+    </style>
+</body>
+</html>

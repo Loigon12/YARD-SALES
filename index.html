@@ -10,8 +10,80 @@
         @import url('https://fonts.googleapis.com/css2?family=Lora:wght@600&family=Inter:wght@300;400;600&display=swap');
         h1 { font-family: 'Lora', serif; }
         body { font-family: 'Inter', sans-serif; }
+        @keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fade-in 1s ease-out forwards;
+}
+
+/* Aplicar retrasos a los elementos del hero para un efecto escalonado */
+header h1 { animation: fade-in 1s ease-out 0.2s forwards; opacity: 0; }
+header p { animation: fade-in 1s ease-out 0.4s forwards; opacity: 0; }
+header .flex { animation: fade-in 1s ease-out 0.6s forwards; opacity: 0; }
+
+        
     </style>
 </head>
+<style>
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-ticker {
+    /* Ajusta los '25s' para hacerlo más rápido o más lento */
+    animation: ticker-scroll 25s linear infinite; 
+  }
+  /* Pausa la animación si el usuario pasa el ratón por encima */
+  .animate-ticker:hover {
+    animation-play-state: paused;
+  }
+</style>
+
+<div class="bg-stone-900 text-stone-200 text-xs sm:text-sm font-medium py-2 overflow-hidden relative border-b border-stone-800 flex">
+  
+  <div class="whitespace-nowrap animate-ticker flex w-max cursor-default">
+    
+    <div class="flex items-center gap-8 px-4">
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        ¡Gran inauguración de la Yard Sale!
+      </span>
+      <span class="text-stone-600">•</span>
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+        Envíos locales en Ibagué y todo el Tolima
+      </span>
+      <span class="text-stone-600">•</span>
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        Transacciones seguras y directas
+      </span>
+      <span class="text-stone-600">•</span>
+    </div>
+
+    <div class="flex items-center gap-8 px-4">
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        ¡Gran inauguración de la Yard Sale!
+      </span>
+      <span class="text-stone-600">•</span>
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+        Envíos locales en Ibagué y todo el Tolima
+      </span>
+      <span class="text-stone-600">•</span>
+      <span class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+        Transacciones seguras y directas
+      </span>
+      <span class="text-stone-600 px-4">•</span>
+    </div>
+    
+  </div>
+</div>
 <body class="bg-stone-50 text-stone-800 min-h-screen">
 
     <nav class="flex justify-between items-center p-6 max-w-6xl mx-auto sticky top-0 bg-stone-50/80 backdrop-blur-md z-40">
@@ -21,6 +93,16 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Publicar
             </button>
+            <button onclick="window.location.href='/mensajes.html'" class="relative p-2 text-stone-600 hover:text-stone-900 transition-colors">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+    </svg>
+    
+    <span id="notificacion-chat" class="hidden absolute top-1 right-1 h-3 w-3">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-600"></span>
+    </span>
+</button>
             <button onclick="handleProfileClick()" class="p-2 hover:bg-stone-200 rounded-full transition">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </button>
@@ -31,15 +113,133 @@
         </div>
     </nav>
 
-    <header class="max-w-4xl mx-auto px-6 py-20 text-center">
-        <span class="text-amber-800 font-semibold tracking-widest text-xs uppercase mb-4 block">Segundas Oportunidades</span>
-        <h1 class="text-5xl md:text-6xl mb-6 text-stone-900 leading-tight">Dando una nueva vida a nuestros tesoros</h1>
-        <p class="text-lg text-stone-600 leading-relaxed max-w-2xl mx-auto font-light italic">
-            "Esta venta nace de la intención de soltar lo que ya no usamos para hacer espacio a nuevas experiencias."
+    <header class="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-white">
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-amber-100/50 blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[10%] right-[10%] w-[30%] h-[30%] rounded-full bg-stone-100 blur-[100px]"></div>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-600 text-[10px] uppercase tracking-[0.2em] font-bold mb-8 animate-fade-in">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+            </span>
+            Compra y venta de articulos!
+        </div>
+
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-stone-950 tracking-tight leading-[0.9] mb-8">
+            Los grandes tesoros <br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-amber-900 to-stone-900">
+                tienen historia.
+            </span>
+        </h1>
+
+        <p class="max-w-2xl mx-auto text-stone-500 text-lg md:text-xl leading-relaxed mb-10 px-4">
+            Yard Sale nace para conectar personas, no solo productos. Creemos en la magia de los objetos usados y en la emoción de encontrar esa pieza única que estabas buscando.
         </p>
-    </header>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button onclick="document.getElementById('product-grid').scrollIntoView({behavior: 'smooth'})" 
+                    class="group px-8 py-4 bg-stone-950 text-white rounded-2xl font-bold text-sm transition-all hover:bg-stone-800 hover:shadow-2xl hover:-translate-y-1 flex items-center gap-2">
+                Explorar Tesoros
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+            </button>
+            <button onclick="window.openPublishModal()" 
+                    class="px-8 py-4 bg-white text-stone-950 border-2 border-stone-200 rounded-2xl font-bold text-sm transition-all hover:border-amber-900/30 hover:bg-stone-50">
+                Vender algo mío
+            </button>
+        </div>
+
+        <div class="mt-20 grid grid-cols-2 md:grid-cols-3 gap-8 border-t border-stone-100 pt-10">
+            <div>
+                <p class="text-2xl font-bold text-stone-900">+500</p>
+                <p class="text-xs text-stone-400 uppercase tracking-widest">Objetos Vendidos</p>
+            </div>
+            <div class="hidden md:block">
+                <p class="text-2xl font-bold text-stone-900">100%</p>
+                <p class="text-xs text-stone-400 uppercase tracking-widest">Trato Directo</p>
+            </div>
+            <div>
+                <p class="text-2xl font-bold text-stone-900">Ibagué</p>
+                <p class="text-xs text-stone-400 uppercase tracking-widest">Comunidad Local</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-30">
+        <div class="w-6 h-10 border-2 border-stone-900 rounded-full flex justify-center pt-2">
+            <div class="w-1 h-2 bg-stone-900 rounded-full"></div>
+        </div>
+    </div>
+</header>
 
     <main class="max-w-6xl mx-auto px-6 py-12">
+        <section class="py-16 mt-6 mb-12 bg-stone-50/40 border-y border-stone-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-2xl mx-auto mb-14 animate-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-stone-900 tracking-tight mb-4">
+                Dale una segunda vida a tus tesoros
+            </h2>
+            <p class="text-stone-500 text-lg leading-relaxed">
+                Compra y vende artículos únicos de forma segura. Únete a nuestra comunidad y descubre oportunidades increíbles o convierte lo que ya no usas en ingresos.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="group bg-white p-8 rounded-2xl border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center cursor-default">
+                <div class="w-16 h-16 mx-auto bg-amber-50 text-amber-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-300">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-stone-900 mb-3 group-hover:text-amber-900 transition-colors">1. Publica en segundos</h3>
+                <p class="text-stone-500 text-sm leading-relaxed">
+                    Toma una buena foto, ponle un precio justo y súbelo a nuestra plataforma. Es totalmente gratis y rápido.
+                </p>
+            </div>
+
+            <div class="group bg-white p-8 rounded-2xl border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center cursor-default">
+                <div class="w-16 h-16 mx-auto bg-amber-50 text-amber-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-300">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-stone-900 mb-3 group-hover:text-amber-900 transition-colors">2. Descubre joyas</h3>
+                <p class="text-stone-500 text-sm leading-relaxed">
+                    Explora nuestra colección. Desde tecnología hasta antigüedades, encuentra lo que buscas a precios inmejorables.
+                </p>
+            </div>
+
+            <div class="group bg-white p-8 rounded-2xl border border-stone-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 text-center cursor-default">
+                <div class="w-16 h-16 mx-auto bg-amber-50 text-amber-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-300">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-stone-900 mb-3 group-hover:text-amber-900 transition-colors">3. Compra segura</h3>
+                <p class="text-stone-500 text-sm leading-relaxed">
+                    Añade al carrito, completa tu información y realiza tu pedido de forma sencilla y directa con el vendedor.
+                </p>
+            </div>
+
+        </div>
+        
+        <div class="mt-14 text-center">
+            <button onclick="window.openPublishModal()" class="px-8 py-3.5 bg-stone-900 text-white text-sm font-semibold rounded-xl hover:bg-stone-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 duration-300 flex items-center gap-2 mx-auto active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Comenzar a vender ahora
+            </button>
+        </div>
+
+    </div>
+</section>
         <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             </div>
     </main>
@@ -159,6 +359,31 @@
         </div>
     </div>
 
+
+    <div id="chat-modal" class="fixed inset-0 z-[60] hidden bg-stone-900/20 backdrop-blur-sm items-center justify-center p-4">
+    <div class="bg-white w-full max-w-md h-[600px] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+        <div class="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50">
+            <div>
+                <h3 id="chat-product-name" class="font-bold text-stone-900 text-lg">Chat del Tesoro</h3>
+                <p class="text-xs text-stone-400">Hablando con el vendedor</p>
+            </div>
+            <button onclick="toggleChatModal()" class="text-stone-400 hover:text-stone-900 transition">✕</button>
+        </div>
+
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-white flex flex-col">
+            </div>
+
+        <form id="chat-form" class="p-4 border-t border-stone-100 bg-stone-50 flex gap-2">
+            <input type="text" id="chat-input" placeholder="Escribe un mensaje..." 
+                   class="flex-1 bg-white border border-stone-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-900/20 transition">
+            <button type="submit" class="bg-stone-900 text-white p-2 rounded-xl hover:bg-stone-800 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
     <script type="module">
     /** IMPORTACIÓN DE SUPABASE **/
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
@@ -260,24 +485,24 @@
         }
 
         grid.innerHTML = productos.map(p => `
-            <div class="group bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm hover:shadow-xl transition-all duration-300">
-                <div class="relative overflow-hidden aspect-square">
-                    <img src="${p.imagen_url}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" alt="${p.nombre}">
-                    <span class="absolute top-3 right-3 bg-stone-900/70 backdrop-blur-sm text-white text-[9px] px-2.5 py-1 rounded-full font-medium tracking-wider uppercase">En Venta</span>
-                </div>
-                <div class="p-6">
-                    <h3 class="text-stone-950 font-semibold mb-1 text-lg leading-tight">${p.nombre}</h3>
-                    <p class="text-stone-500 text-xs mb-3 line-clamp-2 italic">${p.descripcion}</p>
-                    <div class="flex items-end justify-between gap-4 mb-4 border-t border-stone-100 pt-3">
-                        <p class="text-amber-900 font-bold text-3xl leading-none">$${p.precio}</p>
-                        <span class="text-xs text-stone-400 italic">Vendedor Privado</span>
-                    </div>
-                    <button onclick="addToCartDB('${p.id}', '${p.nombre.replace(/'/g, "\\'")}', ${p.precio}, '${p.imagen_url}')" class="w-full border-2 border-amber-900/80 text-amber-950 py-3 rounded-xl text-sm font-semibold hover:bg-amber-900 hover:text-white transition-colors duration-300 active:scale-95 flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                        Lo quiero
-                    </button>
-                </div>
-            </div>
+           <div class="bg-white rounded-3xl p-4 border border-stone-100 shadow-sm">
+        <img src="${p.imagen_url}" class="w-full h-48 object-cover rounded-2xl mb-4">
+        <h3 class="font-bold text-stone-900">${p.nombre}</h3>
+        <p class="text-amber-900 font-bold mb-4">$${p.precio}</p>
+
+        <div class="flex gap-2">
+            <button onclick="addToCartDB('${p.id}', '${p.nombre}', ${p.precio})" 
+                    class="flex-1 bg-stone-900 text-white py-3 rounded-xl text-sm font-semibold hover:bg-stone-800 transition-all active:scale-95">
+                Lo quiero
+            </button>
+            <button onclick="openChat('${p.id}', '${p.vendedor_id}', '${p.nombre.replace(/'/g, "\\'")}')" 
+                    class="px-4 border-2 border-stone-200 text-stone-600 rounded-xl hover:bg-stone-50 transition-all active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+            </button>
+        </div>
+    </div>
         `).join('');
     }
 
@@ -441,6 +666,145 @@
             });
         }
     });
+
+    // --- VARIABLES DE ESTADO DEL CHAT ---
+let activeProductId = null;
+let activeSellerId = null;
+let chatSubscription = null;
+
+// --- FUNCIONES GLOBALES ---
+window.toggleChatModal = () => {
+    const modal = document.getElementById('chat-modal');
+    modal.classList.toggle('hidden');
+    modal.classList.toggle('flex');
+    if (modal.classList.contains('hidden') && chatSubscription) {
+        chatSubscription.unsubscribe(); // Detener escucha al cerrar
+    }
+};
+
+window.openChat = async (productoId, vendedorId, productoNombre) => {
+    const { data: { user } } = await miYardSale.auth.getUser();
+    
+    if (!user) {
+        alert("Debes iniciar sesión para contactar al vendedor.");
+        return window.toggleAuthModal();
+    }
+    if (user.id === vendedorId) return alert("¡Este tesoro es tuyo!");
+
+    activeProductId = productoId;
+    activeSellerId = vendedorId;
+    document.getElementById('chat-product-name').innerText = productoNombre;
+    
+    window.toggleChatModal();
+    loadMessages();
+    subscribeToMessages();
+};
+
+// --- CARGAR HISTORIAL ---
+async function loadMessages() {
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '<p class="text-center text-stone-400 text-xs italic">Cargando conversación...</p>';
+
+    const { data: mensajes, error } = await miYardSale
+        .from('mensajes')
+        .select('*')
+        .eq('producto_id', activeProductId)
+        .order('created_at', { ascending: true });
+
+    if (error) return console.error(error);
+    
+    container.innerHTML = '';
+    const { data: { user } } = await miYardSale.auth.getUser();
+    mensajes.forEach(msg => renderMessage(msg, user.id));
+    container.scrollTop = container.scrollHeight;
+}
+
+// --- RENDERIZAR MENSAJE ---
+function renderMessage(msg, currentUserId) {
+    const container = document.getElementById('chat-messages');
+    const isMine = msg.emisor_id === currentUserId;
+
+    const msgHtml = `
+        <div class="max-w-[80%] ${isMine ? 'self-end bg-stone-900 text-white rounded-2xl rounded-tr-none' : 'self-start bg-stone-100 text-stone-800 rounded-2xl rounded-tl-none'} p-3 shadow-sm animate-fade-in">
+            <p class="text-sm">${msg.contenido}</p>
+            <span class="text-[9px] opacity-50 mt-1 block">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', msgHtml);
+    container.scrollTop = container.scrollHeight;
+}
+
+// --- ESCUCHAR EN TIEMPO REAL ---
+function subscribeToMessages() {
+    chatSubscription = miYardSale
+        .channel('public:mensajes')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensajes', filter: `producto_id=eq.${activeProductId}` }, 
+        async (payload) => {
+            const { data: { user } } = await miYardSale.auth.getUser();
+            if (payload.new.emisor_id !== user.id) {
+                renderMessage(payload.new, user.id);
+            }
+        })
+        .subscribe();
+}
+
+// --- EVENTO DE ENVÍO ---
+document.getElementById('chat-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chat-input');
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    const { data: { user } } = await miYardSale.auth.getUser();
+
+    const nuevoMensaje = {
+        contenido: texto,
+        emisor_id: user.id,
+        receptor_id: activeSellerId,
+        producto_id: activeProductId
+    };
+
+    input.value = '';
+    renderMessage({ ...nuevoMensaje, created_at: new Date() }, user.id);
+
+    const { error } = await miYardSale.from('mensajes').insert([nuevoMensaje]);
+    if (error) alert("No se pudo enviar el mensaje.");
+});
+
+// --- FUNCIÓN PARA ESCUCHAR NOTIFICACIONES DE CHAT ---
+async function iniciarEscuchaNotificaciones() {
+    const { data: { user } } = await miYardSale.auth.getUser();
+    
+    if (!user) return; // Si no hay usuario, no escuchamos nada
+
+    const badge = document.getElementById('notificacion-chat');
+
+    // Suscribirse a la tabla 'mensajes' filtrando por el receptor
+    miYardSale
+        .channel('notificaciones-mensajes')
+        .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'mensajes',
+            filter: `receptor_id=eq.${user.id}` // Solo mensajes dirigidos a mí
+        }, (payload) => {
+            console.log("¡Nuevo mensaje recibido!");
+            
+            // Mostrar el indicador animado
+            if (badge) {
+                badge.classList.remove('hidden');
+                
+                // Opcional: Sonido sutil de notificación
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3');
+                audio.volume = 0.2;
+                audio.play().catch(e => console.log("Audio bloqueado por el navegador"));
+            }
+        })
+        .subscribe();
+}
+
+// Iniciar la escucha al cargar la página
+document.addEventListener('DOMContentLoaded', iniciarEscuchaNotificaciones);
 </script>
 </body>
 </html>
