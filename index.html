@@ -727,17 +727,46 @@ async function loadMessages() {
     container.scrollTop = container.scrollHeight;
 }
 
-// --- RENDERIZAR MENSAJE ---
+// --- RENDERIZAR MENSAJE (Versión Personalizada con Colores por Rol) ---
 function renderMessage(msg, currentUserId) {
     const container = document.getElementById('chat-messages');
-    const isMine = msg.emisor_id === currentUserId;
+    if (!container) return; // Seguridad si el contenedor no existe
 
+    const isMine = msg.emisor_id === currentUserId;
+    
+    // Suponemos que 'activeSellerId' está definida globalmente 
+    // cuando se llama a openChat().
+    const isSeller = msg.emisor_id === activeSellerId;
+
+    // DEFINICIÓN DE CLASES TAILWIND DINÁMICAS
+    
+    // 1. Alineación (Izquierda vs Derecha) - Basado en si el mensaje es MÍO
+    const alignmentClass = isMine ? 'self-end' : 'self-start';
+    
+    // 2. Esquina redondeada (Estilo burbuja) - Basado en si el mensaje es MÍO
+    const cornerClass = isMine ? 'rounded-tr-none' : 'rounded-tl-none';
+    
+    // 3. Colores y Fondos - Basado en si el emisor es el VENDEDOR o COMPRADOR
+    // Vendedor: Tema Ámbar (resaltado)
+    // Comprador: Tema Piedra (neutro)
+    const bubbleColorClass = isSeller 
+        ? 'bg-amber-100 text-amber-950 border border-amber-200/50' 
+        : 'bg-stone-100 text-stone-800 border border-stone-200/50';
+
+    // Color del texto de la hora para que combine
+    const timeColorClass = isSeller ? 'text-amber-900/60' : 'text-stone-500/70';
+
+    // CONSTRUCCIÓN DEL HTML
     const msgHtml = `
-        <div class="max-w-[80%] ${isMine ? 'self-end bg-stone-900 text-white rounded-2xl rounded-tr-none' : 'self-start bg-stone-100 text-stone-800 rounded-2xl rounded-tl-none'} p-3 shadow-sm animate-fade-in">
-            <p class="text-sm">${msg.contenido}</p>
-            <span class="text-[9px] opacity-50 mt-1 block">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        <div class="max-w-[85%] ${alignmentClass} ${bubbleColorClass} rounded-2xl ${cornerClass} p-3.5 shadow-sm animate-fade-in flex flex-col gap-1">
+            <p class="text-sm leading-relaxed">${msg.contenido}</p>
+            <span class="text-[10px] ${timeColorClass} mt-1 block text-right font-medium">
+                ${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+            </span>
         </div>
     `;
+    
+    // Insertar y hacer scroll automático al final
     container.insertAdjacentHTML('beforeend', msgHtml);
     container.scrollTop = container.scrollHeight;
 }
